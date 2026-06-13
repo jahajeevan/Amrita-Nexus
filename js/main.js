@@ -92,8 +92,9 @@ const App = (() => {
 
   const api = async (path, options = {}) => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    // Always connect to real backend in production Vercel; local development can toggle using localStorage
-    const USE_REAL_BACKEND = !isLocal || localStorage.getItem("use_real_backend") === "true";
+    // Default to Offline Local Storage Demo mode (shows OTP popup on screen).
+    // Set 'use_real_backend' to 'true' in localStorage to connect to a real Node backend.
+    const USE_REAL_BACKEND = localStorage.getItem("use_real_backend") === "true";
 
     if (USE_REAL_BACKEND) {
       // Points to current host in production, points to local port 5001 during local development
