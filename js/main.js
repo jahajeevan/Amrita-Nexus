@@ -99,7 +99,7 @@ const App = (() => {
       // Points to Render in production, points to local port 5001 during local development
       const BASE_URL = isLocal 
         ? "http://localhost:5001/api" 
-        : "https://amrita-nexus-backend.onrender.com/api"; // <-- REPLACE THIS WITH YOUR DEPLOYED RENDER BACKEND URL!
+        : "https://amrita-nexus.onrender.com/api"; // <-- REPLACE THIS WITH YOUR DEPLOYED RENDER BACKEND URL!
       const session = getSession();
       const headers = {
         "Content-Type": "application/json",
