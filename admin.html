@@ -91,6 +91,10 @@
               <input class="input" type="text" name="venue" required>
             </label>
             <label class="label">
+              <span>Venue Map URL</span>
+              <input class="input" type="url" name="venueMap" placeholder="https://www.google.com/maps/..." required>
+            </label>
+            <label class="label">
               <span>Category</span>
               <select class="select" name="category" required>
                 <option value="" selected disabled></option>
@@ -146,22 +150,31 @@
             <span class="eyebrow">Registrations</span>
             <h3>Registered students</h3>
           </div>
+          <div class="admin-export-actions">
+            <input class="input" id="registrationSearch" type="search" placeholder="Search students or events">
+            <select class="select" id="registrationEventFilter">
+              <option value="">All events</option>
+            </select>
+            <button class="ghost-btn" type="button" id="exportCsvBtn">Export CSV</button>
+            <button class="ghost-btn" type="button" id="exportExcelBtn">Export Excel</button>
+          </div>
         </div>
         <table class="table">
           <thead>
             <tr>
-              <th>Event</th>
-              <th>Ticket ID</th>
-              <th>Student</th>
+              <th>Student Name</th>
+              <th>Roll Number</th>
               <th>Department</th>
-              <th>Venue</th>
-              <th>Event End</th>
-              <th>Registered At</th>
+              <th>Year</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Event Name</th>
+              <th>Registration Date</th>
             </tr>
           </thead>
           <tbody id="registrationsBody">
             <tr>
-              <td colspan="7">Loading registrations...</td>
+              <td colspan="8">Loading registrations...</td>
             </tr>
           </tbody>
         </table>

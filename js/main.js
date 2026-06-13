@@ -92,9 +92,10 @@ const App = (() => {
 
   const api = async (path, options = {}) => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    // Default to Offline Local Storage Demo mode (shows OTP popup on screen).
-    // Set 'use_real_backend' to 'true' in localStorage to connect to a real Node backend.
-    const USE_REAL_BACKEND = localStorage.getItem("use_real_backend") === "true";
+    // Use the Express API by default so MongoDB-backed deployments behave the same as localhost.
+    const USE_REAL_BACKEND = window.location.protocol === "file:"
+      ? localStorage.getItem("use_real_backend") === "true"
+      : localStorage.getItem("use_real_backend") !== "false";
 
     if (USE_REAL_BACKEND) {
       // Points to current host in production, points to local port 5001 during local development
@@ -138,9 +139,11 @@ const App = (() => {
             _id: "evt1",
             title: "Amrita Hackathon 2026",
             date: "2026-06-25",
+            startTime: "09:00",
             time: "09:00",
             endTime: "18:00",
             venue: "Sudhamani Hall",
+            venueMap: "https://www.google.com/maps/search/?api=1&query=Sudhamani%20Hall%20Amrita%20University",
             category: "Tech",
             description: "An intense 24-hour coding challenge where students solve real-world campus problems.",
             image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
@@ -149,9 +152,11 @@ const App = (() => {
             _id: "evt2",
             title: "Goonj Cultural Fest",
             date: "2026-07-10",
+            startTime: "14:00",
             time: "14:00",
             endTime: "22:00",
             venue: "Open Air Theatre",
+            venueMap: "https://www.google.com/maps/search/?api=1&query=Open%20Air%20Theatre%20Amrita%20University",
             category: "Cultural",
             description: "Amrita's annual cultural celebration featuring dance, music, and dramatic performances.",
             image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80"
@@ -160,9 +165,11 @@ const App = (() => {
             _id: "evt3",
             title: "Inter-Campus Sports Meet",
             date: "2026-08-05",
+            startTime: "08:00",
             time: "08:00",
             endTime: "17:00",
             venue: "Main Ground",
+            venueMap: "https://www.google.com/maps/search/?api=1&query=Main%20Ground%20Amrita%20University",
             category: "Sports",
             description: "Track and field competitions, football tournaments, and basketball matches across all departments.",
             image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80"
@@ -296,9 +303,11 @@ const App = (() => {
         _id: "evt_" + Date.now(),
         title: body.title,
         date: body.date,
-        time: body.time,
+        startTime: body.startTime || body.time,
+        time: body.startTime || body.time,
         endTime: body.endTime,
         venue: body.venue,
+        venueMap: body.venueMap,
         category: body.category,
         description: body.description,
         image: body.image || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80"
@@ -336,22 +345,40 @@ const App = (() => {
       if (!event) throw new Error("Event not found.");
 
       const registrations = getRegistrations();
-      const existing = registrations.find(r => r.student?.email === session?.email && r.eventId === eventId);
-      if (existing) throw new Error("You are already registered for this event.");
+      const email = String(body.email || session?.email || "").trim().toLowerCase();
+      const existing = registrations.find(r => (r.email || r.student?.email) === email && r.eventId === eventId);
+      if (existing) throw new Error("This email is already registered for this event.");
 
       const users = getUsers();
-      const student = users.find(u => u.email === session?.email) || { name: body.name || "Student", email: session?.email };
+      const student = users.find(u => u.email === session?.email) || { name: body.fullName || body.name || "Student", email };
+      const registrationDate = new Date().toISOString();
+      const ticketId = "TKT-" + Math.floor(100000 + Math.random() * 900000);
 
       const newReg = {
         _id: "reg_" + Date.now(),
         id: "reg_" + Date.now(),
         eventId,
+        eventName: event.title,
         event,
-        student,
-        ticketId: "TKT-" + Math.floor(100000 + Math.random() * 900000),
-        department: body.department || "Computer Science",
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString()
+        fullName: body.fullName || body.name,
+        rollNumber: body.rollNumber,
+        department: body.department,
+        year: body.year,
+        email,
+        phone: body.phone,
+        student: {
+          ...student,
+          name: body.fullName || body.name || student.name,
+          email,
+          rollNumber: body.rollNumber,
+          year: body.year,
+          phone: body.phone
+        },
+        ticketId,
+        registrationId: ticketId,
+        registrationDate,
+        timestamp: registrationDate,
+        createdAt: registrationDate
       };
       registrations.push(newReg);
       saveRegistrations(registrations);
@@ -451,6 +478,58 @@ const App = (() => {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
+  const getEventId = (event = {}) => String(event._id || event.id || "");
+  const getRegistrationId = (registration = {}) => String(registration._id || registration.id || "");
+  const getEventStartTime = (event = {}) => event.startTime || event.time || "";
+  const getVenueMap = (event = {}) => event.venueMap || event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue || "Amrita University")}`;
+  const isValidHttpUrl = (value) => {
+    try {
+      const parsed = new URL(String(value || "").trim());
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch (error) {
+      return false;
+    }
+  };
+  const normalizeEvent = (event = {}) => ({
+    ...event,
+    _id: getEventId(event),
+    id: getEventId(event),
+    startTime: getEventStartTime(event),
+    time: getEventStartTime(event),
+    venueMap: getVenueMap(event),
+    mapsUrl: getVenueMap(event),
+    registrationCount: Number(event.registrationCount || 0)
+  });
+  const normalizeRegistration = (registration = {}) => {
+    const event = registration.event ? normalizeEvent(registration.event) : null;
+    const fullName = registration.fullName || registration.student?.name || registration.studentName || "";
+    const email = registration.email || registration.student?.email || registration.studentEmail || "";
+    return {
+      ...registration,
+      _id: getRegistrationId(registration),
+      id: getRegistrationId(registration),
+      eventId: String(registration.eventId || event?._id || ""),
+      eventName: registration.eventName || event?.title || "",
+      event,
+      fullName,
+      rollNumber: registration.rollNumber || registration.student?.rollNumber || "",
+      department: registration.department || "",
+      year: registration.year || registration.student?.year || "",
+      email,
+      phone: registration.phone || registration.student?.phone || "",
+      registrationDate: registration.registrationDate || registration.timestamp || registration.createdAt || "",
+      ticketId: registration.ticketId || registration.registrationId || `ANX-${getRegistrationId(registration).slice(-8).toUpperCase()}`,
+      student: {
+        ...(registration.student || {}),
+        name: fullName,
+        email,
+        rollNumber: registration.rollNumber || registration.student?.rollNumber || "",
+        year: registration.year || registration.student?.year || "",
+        phone: registration.phone || registration.student?.phone || ""
+      }
+    };
+  };
+
   const fileToDataUrl = (file) => new Promise((resolve, reject) => {
     if (!file) {
       resolve("");
@@ -470,14 +549,15 @@ const App = (() => {
   };
 
   const ticketQrPayload = (registration) => [
-    "Amrita Nexus Ticket",
-    `Ticket ID: ${registration.ticketId}`,
+    "Amrita Nexus Event Pass",
+    `Registration ID: ${registration.ticketId}`,
     `Event: ${registration.event?.title || ""}`,
     `Student: ${registration.student?.name || ""}`,
+    `Roll Number: ${registration.rollNumber || ""}`,
     `Email: ${registration.student?.email || ""}`,
     `Department: ${registration.department || ""}`,
     `Date: ${registration.event?.date || ""}`,
-    `Time: ${registration.event?.time || ""}`,
+      `Time: ${getEventStartTime(registration.event) || ""}`,
     `Venue: ${registration.event?.venue || ""}`
   ].join("\n");
 
@@ -571,7 +651,7 @@ const App = (() => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(registration.ticketId)} | Amrita Nexus Ticket</title>
+  <title>${escapeHtml(registration.ticketId)} | Amrita Nexus Event Pass</title>
   <style>
     body {
       margin: 0;
@@ -672,9 +752,9 @@ const App = (() => {
   <article class="ticket">
     <div class="ticket-head">
       <div>
-        <span class="badge">Amrita Nexus Ticket</span>
+        <span class="badge">Amrita Nexus Event Pass</span>
         <h1>${escapeHtml(registration.event?.title || "")}</h1>
-        <p class="sub">${escapeHtml(formatDate(registration.event?.date, registration.event?.time))} • ${escapeHtml(registration.event?.venue || "")}</p>
+        <p class="sub">${escapeHtml(formatDate(registration.event?.date, getEventStartTime(registration.event)))} • ${escapeHtml(registration.event?.venue || "")}</p>
       </div>
       <div class="badge">${escapeHtml(registration.ticketId)}</div>
     </div>
@@ -690,6 +770,10 @@ const App = (() => {
             <strong>${escapeHtml(registration.student?.email || "-")}</strong>
           </div>
           <div class="meta-card">
+            <span>Roll Number</span>
+            <strong>${escapeHtml(registration.rollNumber || "-")}</strong>
+          </div>
+          <div class="meta-card">
             <span>Department</span>
             <strong>${escapeHtml(registration.department || "-")}</strong>
           </div>
@@ -703,7 +787,7 @@ const App = (() => {
         ${qrDataUrl ? `<img src="${qrDataUrl}" alt="Ticket QR code">` : `<p>${escapeHtml(payload).replace(/\n/g, "<br>")}</p>`}
       </div>
     </div>
-    <p class="ticket-note">Show this ticket at the venue entrance. The QR contains readable ticket details for scanning, including ticket ID, event, student, department, date, time, and venue.</p>
+    <p class="ticket-note">Show this pass at the venue entrance. The QR contains readable registration details for scanning, including registration ID, event, student, roll number, department, date, time, and venue.</p>
   </article>
 </body>
 </html>`;
@@ -923,16 +1007,17 @@ const App = (() => {
       <div class="ticket-card">
         <div class="ticket-copy">
           <h4>${escapeHtml(registration.event?.title || "Event unavailable")}</h4>
-          <p>${escapeHtml(formatDate(registration.event?.date, registration.event?.time))}</p>
+          <p>${escapeHtml(formatDate(registration.event?.date, getEventStartTime(registration.event)))}</p>
           <p>${escapeHtml(registration.event?.venue || "")}</p>
-          <p>Ticket ID: ${escapeHtml(registration.ticketId)}</p>
+          <p>Registration ID: ${escapeHtml(registration.ticketId)}</p>
+          <p>Roll Number: ${escapeHtml(registration.rollNumber || "-")}</p>
           <p>Department: ${escapeHtml(registration.department || "-")}</p>
         </div>
         <div class="ticket-qr" data-ticket='${escapeHtml(ticketQrPayload(registration))}'></div>
         <div class="card-actions ticket-actions">
-          <a class="ghost-btn" href="event.html?id=${registration.event?.id}">View</a>
+          <a class="ghost-btn" href="event.html?id=${getEventId(registration.event)}">View</a>
           <a class="outline-btn" href="${buildCalendarLink(registration.event || {})}" target="_blank" rel="noreferrer">Calendar</a>
-          <button class="outline-btn" type="button" data-download-ticket="${registration.id}">Download Ticket</button>
+          <button class="outline-btn" type="button" data-download-ticket="${registration.id}">Download Pass</button>
         </div>
       </div>
     `).join("");
@@ -965,17 +1050,17 @@ const App = (() => {
         <img class="event-card-image" src="${escapeHtml(event.image || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80")}" alt="${escapeHtml(event.title)}">
         <div class="event-card-top">
           <div class="pill">${escapeHtml(event.category)}</div>
-          <button class="bookmark-btn ${state.bookmarks.has(event.id) ? "active" : ""}" type="button" data-bookmark-event="${event.id}" aria-label="Toggle bookmark">★</button>
+          <button class="bookmark-btn ${state.bookmarks.has(getEventId(event)) ? "active" : ""}" type="button" data-bookmark-event="${getEventId(event)}" aria-label="Toggle bookmark">★</button>
         </div>
         <h3>${escapeHtml(event.title)}</h3>
         <div class="event-meta">
-          <span>${escapeHtml(formatDate(event.date, event.time))}</span>
+          <span>${escapeHtml(formatDate(event.date, getEventStartTime(event)))}</span>
           <span>${escapeHtml(event.venue)}</span>
         </div>
         <p>${escapeHtml(event.description)}</p>
         <div class="card-actions">
-          <a class="btn" href="event.html?id=${event.id}">View Details</a>
-          <a class="outline-btn" href="${event.mapsUrl}" target="_blank" rel="noreferrer">Venue Map</a>
+          <a class="btn" href="event.html?id=${getEventId(event)}">View Details</a>
+          <a class="outline-btn" href="${getVenueMap(event)}" target="_blank" rel="noreferrer">Venue Map</a>
         </div>
       </article>
     `).join("");
@@ -1000,8 +1085,8 @@ const App = (() => {
         api("/events"),
         api("/register/mine/list")
       ]);
-      state.events = events;
-      state.registrations = registrations;
+      state.events = events.map(normalizeEvent);
+      state.registrations = registrations.map(normalizeRegistration);
       qs("#eventCount").textContent = String(events.length);
       qs("#registrationCount").textContent = String(registrations.length);
       const bookmarkNode = qs("#bookmarkCount");
@@ -1043,16 +1128,17 @@ const App = (() => {
       <div class="ticket-card detail-ticket">
         <div class="ticket-copy">
           <h4>${escapeHtml(registration.event?.title || "")}</h4>
-          <p>${escapeHtml(formatDate(registration.event?.date, registration.event?.time))}</p>
+          <p>${escapeHtml(formatDate(registration.event?.date, getEventStartTime(registration.event)))}</p>
           <p>${escapeHtml(registration.event?.venue || "")}</p>
-          <p>Ticket ID: ${escapeHtml(registration.ticketId)}</p>
+          <p>Registration ID: ${escapeHtml(registration.ticketId)}</p>
           <p>Name: ${escapeHtml(registration.student?.name || "-")}</p>
+          <p>Roll Number: ${escapeHtml(registration.rollNumber || "-")}</p>
           <p>Department: ${escapeHtml(registration.department || "-")}</p>
         </div>
         <div class="ticket-qr" data-ticket='${escapeHtml(ticketQrPayload(registration))}'></div>
         <div class="card-actions">
           <a class="outline-btn" href="${buildCalendarLink(registration.event || {})}" target="_blank" rel="noreferrer">Add to Calendar</a>
-          <button class="outline-btn" type="button" data-download-detail-ticket="${escapeHtml(registration.id)}">Download Ticket</button>
+          <button class="outline-btn" type="button" data-download-detail-ticket="${escapeHtml(registration.id)}">Download Pass</button>
         </div>
       </div>
     `;
@@ -1071,12 +1157,14 @@ const App = (() => {
     }
 
     const refresh = async () => {
-      const [event, registrations] = await Promise.all([
+      const [rawEvent, rawRegistrations] = await Promise.all([
         api(`/events/${eventId}`),
         api("/register/mine/list")
       ]);
+      const event = normalizeEvent(rawEvent);
+      const registrations = rawRegistrations.map(normalizeRegistration);
       state.registrations = registrations;
-      const existingRegistration = registrations.find((item) => item.event?.id === eventId);
+      const existingRegistration = registrations.find((item) => item.eventId === eventId || getEventId(item.event) === eventId);
 
       root.innerHTML = `
         <div class="event-detail-layout">
@@ -1087,27 +1175,41 @@ const App = (() => {
             <span class="pill">${escapeHtml(event.category)}</span>
             <h1>${escapeHtml(event.title)}</h1>
             <div class="event-meta detail-meta">
-              <span>${escapeHtml(formatDate(event.date, event.time))}</span>
+              <span>${escapeHtml(formatDate(event.date, getEventStartTime(event)))}</span>
+              <span>${escapeHtml(getEventStartTime(event))}${event.endTime ? ` - ${escapeHtml(event.endTime)}` : ""}</span>
               <span>${escapeHtml(event.venue)}</span>
+              <span>${escapeHtml(event.registrationCount)} registrations</span>
             </div>
             <p>${escapeHtml(event.description)}</p>
             <div class="card-actions detail-actions">
               <button class="btn" id="detailRegisterBtn" ${existingRegistration ? "disabled" : ""}>${existingRegistration ? "Already Registered" : "Register Now"}</button>
-              <a class="ghost-btn" href="${event.mapsUrl}" target="_blank" rel="noreferrer">Open Google Maps</a>
+              <a class="ghost-btn" href="${getVenueMap(event)}" target="_blank" rel="noreferrer">View Venue Map</a>
               <a class="outline-btn" href="${buildCalendarLink(event)}" target="_blank" rel="noreferrer">Add to Calendar</a>
             </div>
             <form class="registration-form hidden" id="detailRegistrationForm">
               <label class="label">
-                <span>Student name</span>
-                <input class="input" type="text" name="name" value="${escapeHtml(session.name || "")}" required>
+                <span>Full Name</span>
+                <input class="input" type="text" name="fullName" value="${escapeHtml(session.name || "")}" required>
               </label>
               <label class="label">
-                <span>Student email</span>
-                <input class="input" type="email" name="email" value="${escapeHtml(session.email || "")}" readonly>
+                <span>Roll Number</span>
+                <input class="input" type="text" name="rollNumber" required>
               </label>
               <label class="label">
                 <span>Department</span>
                 <input class="input" type="text" name="department" required>
+              </label>
+              <label class="label">
+                <span>Year</span>
+                <input class="input" type="text" name="year" placeholder="e.g. 2nd Year" required>
+              </label>
+              <label class="label">
+                <span>Email</span>
+                <input class="input" type="email" name="email" value="${escapeHtml(session.email || "")}" readonly>
+              </label>
+              <label class="label">
+                <span>Phone Number</span>
+                <input class="input" type="tel" name="phone" required>
               </label>
               <div class="form-actions">
                 <button class="btn" type="submit" id="confirmRegisterBtn">Confirm Registration</button>
@@ -1136,8 +1238,12 @@ const App = (() => {
         const button = qs("#confirmRegisterBtn");
         const form = submitEvent.currentTarget;
         const payload = {
-          name: form.name.value.trim(),
-          department: form.department.value.trim()
+          fullName: form.fullName.value.trim(),
+          rollNumber: form.rollNumber.value.trim(),
+          department: form.department.value.trim(),
+          year: form.year.value.trim(),
+          email: form.email.value.trim(),
+          phone: form.phone.value.trim()
         };
 
         setLoading(button, true, "Registering");
@@ -1165,7 +1271,7 @@ const App = (() => {
 
   const fillEventForm = (form, event = null) => {
     form.reset();
-    form.dataset.editing = event?.id || "";
+    form.dataset.editing = event ? getEventId(event) : "";
     form.dataset.currentImage = event?.image || "";
     qs("#eventFormTitle").textContent = event ? "Edit event" : "Create event";
     qs("#saveEventBtn").textContent = event ? "Save Changes" : "Publish Event";
@@ -1176,9 +1282,10 @@ const App = (() => {
     form.title.value = event.title || "";
     form.description.value = event.description || "";
     form.date.value = event.date || "";
-    form.time.value = event.time || "";
+    form.time.value = getEventStartTime(event);
     form.endTime.value = event.endTime || "";
     form.venue.value = event.venue || "";
+    form.venueMap.value = getVenueMap(event);
     form.category.value = event.category || "";
   };
 
@@ -1192,12 +1299,12 @@ const App = (() => {
     body.innerHTML = events.map((event) => `
       <tr>
         <td><strong>${escapeHtml(event.title)}</strong><br><span>${escapeHtml(event.category)}</span></td>
-        <td>${escapeHtml(formatDate(event.date, event.time))}</td>
+        <td>${escapeHtml(formatDate(event.date, getEventStartTime(event)))}</td>
         <td>${escapeHtml(event.venue)}</td>
         <td>
           <div class="card-actions event-actions">
-            <button class="ghost-btn" data-edit-event="${event.id}">Edit</button>
-            <button class="danger-btn" data-delete-event="${event.id}">Delete</button>
+            <button class="ghost-btn" data-edit-event="${getEventId(event)}">Edit</button>
+            <button class="danger-btn" data-delete-event="${getEventId(event)}">Delete</button>
           </div>
         </td>
       </tr>
@@ -1207,21 +1314,89 @@ const App = (() => {
   const renderAdminRegistrations = (registrations) => {
     const body = qs("#registrationsBody");
     if (!body) return;
-    if (!registrations.length) {
-      body.innerHTML = `<tr><td colspan="7">No student registrations yet.</td></tr>`;
+    const rows = getFilteredAdminRegistrations(registrations);
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="8">No matching student registrations.</td></tr>`;
       return;
     }
-    body.innerHTML = registrations.map((row) => `
+    body.innerHTML = rows.map((row) => `
       <tr>
-        <td>${escapeHtml(row.event?.title || "Deleted Event")}</td>
-        <td>${escapeHtml(row.ticketId || "-")}</td>
-        <td>${escapeHtml(row.student?.name || row.student?.email || "-")}<br><span>${escapeHtml(row.student?.email || "-")}</span></td>
+        <td>${escapeHtml(row.fullName || "-")}</td>
+        <td>${escapeHtml(row.rollNumber || "-")}</td>
         <td>${escapeHtml(row.department || "-")}</td>
-        <td>${escapeHtml(row.event?.venue || "-")}</td>
-        <td>${escapeHtml(row.event?.endTime || row.event?.time || "-")}</td>
-        <td>${escapeHtml(new Date(row.timestamp).toLocaleString("en-IN"))}</td>
+        <td>${escapeHtml(row.year || "-")}</td>
+        <td>${escapeHtml(row.email || "-")}</td>
+        <td>${escapeHtml(row.phone || "-")}</td>
+        <td>${escapeHtml(row.eventName || row.event?.title || "Deleted Event")}</td>
+        <td>${escapeHtml(row.registrationDate ? new Date(row.registrationDate).toLocaleString("en-IN") : "-")}</td>
       </tr>
     `).join("");
+  };
+
+  const getFilteredAdminRegistrations = (registrations) => {
+    const search = qs("#registrationSearch")?.value.trim().toLowerCase() || "";
+    const eventFilter = qs("#registrationEventFilter")?.value || "";
+    return registrations.filter((row) => {
+      const matchesEvent = !eventFilter || row.eventName === eventFilter;
+      const haystack = [
+        row.fullName,
+        row.rollNumber,
+        row.department,
+        row.year,
+        row.email,
+        row.phone,
+        row.eventName
+      ].join(" ").toLowerCase();
+      return matchesEvent && (!search || haystack.includes(search));
+    });
+  };
+
+  const updateRegistrationEventFilter = (registrations) => {
+    const select = qs("#registrationEventFilter");
+    if (!select) return;
+    const current = select.value;
+    const events = [...new Set(registrations.map((row) => row.eventName || row.event?.title).filter(Boolean))].sort();
+    select.innerHTML = `<option value="">All events</option>${events.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}`;
+    select.value = events.includes(current) ? current : "";
+  };
+
+  const registrationExportRows = () => {
+    const headers = ["Student Name", "Roll Number", "Department", "Year", "Email", "Phone", "Event Name", "Registration Date"];
+    const rows = getFilteredAdminRegistrations(state.registrations).map((row) => [
+      row.fullName || "",
+      row.rollNumber || "",
+      row.department || "",
+      row.year || "",
+      row.email || "",
+      row.phone || "",
+      row.eventName || row.event?.title || "",
+      row.registrationDate ? new Date(row.registrationDate).toLocaleString("en-IN") : ""
+    ]);
+    return { headers, rows };
+  };
+
+  const downloadTextFile = (filename, content, type) => {
+    const blob = new Blob([content], { type });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(href);
+  };
+
+  const toCsv = (rows) => rows.map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\n");
+
+  const exportRegistrations = (format) => {
+    const { headers, rows } = registrationExportRows();
+    if (format === "excel") {
+      const table = `<table><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+      downloadTextFile("amrita-nexus-registrations.xls", table, "application/vnd.ms-excel;charset=utf-8");
+      return;
+    }
+    downloadTextFile("amrita-nexus-registrations.csv", toCsv([headers, ...rows]), "text/csv;charset=utf-8");
   };
 
   const renderAdminMessages = (messages) => {
@@ -1274,13 +1449,14 @@ const App = (() => {
         api("/admin/registrations"),
         api("/admin/messages")
       ]);
-      state.events = events;
-      state.registrations = adminData.registrations;
+      state.events = events.map(normalizeEvent);
+      state.registrations = adminData.registrations.map(normalizeRegistration);
       qs("#adminEventCount").textContent = String(adminData.summary.events);
       qs("#adminUserCount").textContent = String(adminData.summary.users);
       qs("#adminRegistrationCount").textContent = String(adminData.summary.registrations);
-      renderAdminEvents(events);
-      renderAdminRegistrations(adminData.registrations);
+      updateRegistrationEventFilter(state.registrations);
+      renderAdminEvents(state.events);
+      renderAdminRegistrations(state.registrations);
       renderAdminMessages(messages);
     };
 
@@ -1300,13 +1476,20 @@ const App = (() => {
         title: form.title.value.trim(),
         description: form.description.value.trim(),
         date: form.date.value,
+        startTime: form.time.value,
         time: form.time.value,
         endTime: form.endTime.value,
         venue: form.venue.value.trim(),
+        venueMap: form.venueMap.value.trim(),
         category: form.category.value,
         image
       };
       const editingId = form.dataset.editing;
+
+      if (!isValidHttpUrl(payload.venueMap)) {
+        showToast("Enter a valid Venue Map URL.", "error");
+        return;
+      }
 
       setLoading(button, true, editingId ? "Saving" : "Publishing");
       try {
@@ -1339,8 +1522,11 @@ const App = (() => {
       const deleteButton = event.target.closest("[data-delete-event]");
 
       if (editButton) {
-        const selected = state.events.find((item) => item.id === editButton.dataset.editEvent);
-        if (selected) fillEventForm(form, selected);
+        const selected = state.events.find((item) => getEventId(item) === editButton.dataset.editEvent);
+        if (selected) {
+          fillEventForm(form, selected);
+          qs("#publisher")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
 
       if (deleteButton) {
@@ -1356,6 +1542,11 @@ const App = (() => {
         }
       }
     });
+
+    qs("#registrationSearch")?.addEventListener("input", () => renderAdminRegistrations(state.registrations));
+    qs("#registrationEventFilter")?.addEventListener("change", () => renderAdminRegistrations(state.registrations));
+    qs("#exportCsvBtn")?.addEventListener("click", () => exportRegistrations("csv"));
+    qs("#exportExcelBtn")?.addEventListener("click", () => exportRegistrations("excel"));
 
     document.addEventListener("submit", async (event) => {
       const replyForm = event.target.closest("[data-reply-form]");
@@ -1403,7 +1594,7 @@ const App = (() => {
       <div class="compact-ticket">
         <div>
           <strong>${escapeHtml(registration.event?.title || "")}</strong>
-          <p>${escapeHtml(formatDate(registration.event?.date, registration.event?.time))}</p>
+          <p>${escapeHtml(formatDate(registration.event?.date, getEventStartTime(registration.event)))}</p>
         </div>
         <span>${escapeHtml(registration.ticketId)}</span>
       </div>
@@ -1417,8 +1608,8 @@ const App = (() => {
           <p>${escapeHtml(registration.department || "-")}</p>
         </div>
         <div class="card-actions">
-          <button class="outline-btn" type="button" data-dashboard-download="${registration.id}">Download Ticket</button>
-          <a class="ghost-btn" href="event.html?id=${registration.event?.id}">View</a>
+          <button class="outline-btn" type="button" data-dashboard-download="${registration.id}">Download Pass</button>
+          <a class="ghost-btn" href="event.html?id=${getEventId(registration.event)}">View</a>
         </div>
       </div>
     `).join("");
@@ -1439,7 +1630,7 @@ const App = (() => {
     if (greeting) greeting.textContent = `${session.name || "Student"}, your home`;
     try {
       const registrations = await api("/register/mine/list");
-      state.registrations = registrations;
+      state.registrations = registrations.map(normalizeRegistration);
       qs("#dashboardRegisteredCount").textContent = String(registrations.length);
       qs("#dashboardBookmarkCount").textContent = String(state.bookmarks.size);
       qs("#dashboardTicketCount").textContent = String(registrations.length);

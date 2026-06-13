@@ -3,41 +3,68 @@ const Registration = require("../models/Registration");
 const User = require("../models/User");
 
 const toTicketId = (registrationId) => `ANX-${String(registrationId).slice(-8).toUpperCase()}`;
-const mapsUrlForVenue = (venue) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
-const serializeRegistration = (item) => ({
+const mapsUrlForVenue = (venue) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue || "Amrita University")}`;
+const eventIdFor = (event) => event?._id || event?.id || null;
+const populatedEventFor = (item) => (item.eventId && typeof item.eventId === "object" && item.eventId.title ? item.eventId : null);
+const serializeRegistration = (item) => {
+  const event = populatedEventFor(item);
+  return ({
+  _id: item._id,
   id: item._id,
-  timestamp: item.timestamp,
+  eventId: eventIdFor(event) || item.eventId,
+  eventName: item.eventName || event?.title || "",
+  fullName: item.fullName || item.studentName,
+  rollNumber: item.rollNumber || "",
+  department: item.department,
+  year: item.year || "",
+  email: item.email || item.studentEmail,
+  phone: item.phone || "",
+  registrationDate: item.registrationDate || item.timestamp,
+  timestamp: item.registrationDate || item.timestamp,
+  registrationId: toTicketId(item._id),
   ticketId: toTicketId(item._id),
   department: item.department,
   student: item.userId ? {
     id: item.userId._id,
-    name: item.studentName || item.userId.name,
-    email: item.studentEmail || item.userId.email
+    name: item.fullName || item.studentName || item.userId.name,
+    email: item.email || item.studentEmail || item.userId.email,
+    rollNumber: item.rollNumber || "",
+    year: item.year || "",
+    phone: item.phone || ""
   } : {
     id: null,
-    name: item.studentName,
-    email: item.studentEmail
+    name: item.fullName || item.studentName,
+    email: item.email || item.studentEmail,
+    rollNumber: item.rollNumber || "",
+    year: item.year || "",
+    phone: item.phone || ""
   },
-  event: item.eventId ? {
-    id: item.eventId._id,
-    title: item.eventId.title,
-    description: item.eventId.description,
-    date: item.eventId.date,
-    time: item.eventId.time,
-    endTime: item.eventId.endTime,
-    venue: item.eventId.venue,
-    category: item.eventId.category,
-    image: item.eventId.image,
-    mapsUrl: mapsUrlForVenue(item.eventId.venue)
+  event: event ? {
+    _id: event._id,
+    id: event._id,
+    title: event.title,
+    description: event.description,
+    date: event.date,
+    startTime: event.startTime || event.time,
+    time: event.startTime || event.time,
+    endTime: event.endTime,
+    venue: event.venue,
+    venueMap: event.venueMap || mapsUrlForVenue(event.venue),
+    category: event.category,
+    image: event.image,
+    mapsUrl: event.venueMap || mapsUrlForVenue(event.venue)
   } : null
-});
+  });
+};
 
 const registerForEvent = async (req, res, next) => {
   try {
     const { eventId } = req.params;
-    const { name, department } = req.body;
-    if (!name?.trim() || !department?.trim()) {
-      return res.status(400).json({ message: "Student name and department are required." });
+    const { fullName, name, rollNumber, department, year, email, phone } = req.body;
+    const resolvedName = fullName || name;
+    const resolvedEmail = String(email || req.user.email || "").trim().toLowerCase();
+    if (!resolvedName?.trim() || !rollNumber?.trim() || !department?.trim() || !year?.trim() || !resolvedEmail || !phone?.trim()) {
+      return res.status(400).json({ message: "Full name, roll number, department, year, email, and phone number are required." });
     }
 
     const event = await Event.findById(eventId);
@@ -46,25 +73,32 @@ const registerForEvent = async (req, res, next) => {
     }
 
     const existingRegistration = await Registration.findOne({
-      userId: req.user.userId,
+      email: resolvedEmail,
       eventId
     });
 
     if (existingRegistration) {
-      return res.status(400).json({ message: "You have already registered for this event." });
+      return res.status(409).json({ message: "This email is already registered for this event." });
     }
 
     const registration = await Registration.create({
       userId: req.user.userId,
       eventId,
-      studentName: name.trim(),
-      studentEmail: req.user.email,
-      department: department.trim()
+      eventName: event.title,
+      fullName: resolvedName.trim(),
+      rollNumber: rollNumber.trim(),
+      department: department.trim(),
+      year: year.trim(),
+      email: resolvedEmail,
+      phone: phone.trim(),
+      registrationDate: new Date(),
+      studentName: resolvedName.trim(),
+      studentEmail: resolvedEmail
     });
 
     await registration.populate([
       { path: "userId", select: "name email" },
-      { path: "eventId", select: "title description date time endTime venue category image" }
+      { path: "eventId", select: "title description date startTime time endTime venue venueMap category image" }
     ]);
 
     return res.status(201).json({
@@ -80,7 +114,7 @@ const getMyRegistrations = async (req, res, next) => {
   try {
     const registrations = await Registration.find({ userId: req.user.userId })
       .populate("eventId")
-      .sort({ timestamp: -1 });
+      .sort({ registrationDate: -1, timestamp: -1 });
 
     return res.json(registrations.map(serializeRegistration));
   } catch (error) {
@@ -126,8 +160,8 @@ const getAdminRegistrations = async (req, res, next) => {
     const [registrations, eventCount, userCount, registrationCount] = await Promise.all([
       Registration.find()
         .populate("userId", "name email role")
-        .populate("eventId", "title date time endTime venue category")
-        .sort({ timestamp: -1 }),
+        .populate("eventId", "title date startTime time endTime venue venueMap category")
+        .sort({ registrationDate: -1, timestamp: -1 }),
       Event.countDocuments(),
       User.countDocuments({ role: "student", verified: true }),
       Registration.countDocuments()

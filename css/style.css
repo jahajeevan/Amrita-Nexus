@@ -2176,7 +2176,8 @@ body.page-admin {
 .page-admin .admin-form label:nth-child(5) { grid-column: span 1; }
 .page-admin .admin-form label:nth-child(6) { grid-column: span 1; }
 .page-admin .admin-form label:nth-child(7) { grid-column: span 1; }
-.page-admin .admin-form label:nth-child(8) { grid-column: span 2; }
+.page-admin .admin-form label:nth-child(8) { grid-column: span 1; }
+.page-admin .admin-form label:nth-child(9) { grid-column: span 2; }
 .page-admin .admin-form .form-actions { grid-column: span 2; }
 
 .page-admin .label {
@@ -2259,7 +2260,7 @@ body.page-admin {
 }
 
 .page-admin .admin-table-card {
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .page-admin .admin-table-card .section-heading {
@@ -2318,6 +2319,30 @@ body.page-admin {
   border-radius: 24px;
   background: #f8fafc;
   border: 1px solid rgba(15, 23, 42, 0.08);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.page-events .registration-form .form-actions {
+  grid-column: 1 / -1;
+}
+
+.page-admin .admin-export-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.page-admin .admin-export-actions .input,
+.page-admin .admin-export-actions .select {
+  width: min(230px, 100%);
+}
+
+.page-admin #registeredStudents .table {
+  min-width: 1040px;
 }
 
 .page-events .detail-ticket-wrap {
@@ -2521,5 +2546,16 @@ body.page-auth {
 
   .page-admin .sidebar {
     position: static;
+  }
+
+  .page-events .registration-form,
+  .page-admin .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .page-admin .admin-form label,
+  .page-admin .admin-form .form-actions,
+  .page-events .registration-form .form-actions {
+    grid-column: 1 / -1 !important;
   }
 }
