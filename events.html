@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Events | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-events" data-page="events">
+  <header class="topbar reveal in-view">
+    <div class="topbar-inner">
+      <a class="brand" href="events.html">
+        <div class="brand-mark">
+          <img src="assets-amrita-logo.png" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div class="brand-copy">
+          <strong>Amrita Nexus</strong>
+          <span>Student event dashboard</span>
+        </div>
+      </a>
+      <nav class="topnav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="events.html" class="active">Events</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="danger-btn hidden" data-auth="logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <article class="dashboard-card reveal in-view">
+        <span class="eyebrow">Event Hub</span>
+        <h1>Welcome back.</h1>
+        <p class="label-meta" id="studentGreeting">student@gmail.com</p>
+        <p class="panel-subtext">Browse the live event feed, reserve your seat, and track all confirmed tickets from a cleaner, more product-like dashboard.</p>
+      </article>
+      <div class="metrics-grid reveal in-view">
+        <div class="metric-card">
+          <strong id="eventCount">0</strong>
+          <span class="kpi-label">Available events</span>
+        </div>
+        <div class="metric-card">
+          <strong id="registrationCount">0</strong>
+          <span class="kpi-label">Your registrations</span>
+        </div>
+        <div class="metric-card">
+          <strong id="bookmarkCount">0</strong>
+          <span class="kpi-label">Bookmarked events</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel-card reveal">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Event Feed</span>
+            <h3>Choose your next experience</h3>
+          </div>
+        </div>
+        <div class="search-row">
+          <label class="label search-label">
+            <span>Search events</span>
+            <input class="input" id="eventSearch" type="search" placeholder="Search by event name">
+          </label>
+        </div>
+        <div class="filters">
+          <button class="filter-chip active" data-category="All">All</button>
+          <button class="filter-chip" data-category="Tech">Tech</button>
+          <button class="filter-chip" data-category="Cultural">Cultural</button>
+          <button class="filter-chip" data-category="Sports">Sports</button>
+          <button class="filter-chip" data-category="Expo">Expo</button>
+        </div>
+        <div class="events-grid" id="eventsGrid">
+          <div class="empty-state">
+            <h3>Loading events...</h3>
+            <p>Please wait while the backend returns the latest event list.</p>
+          </div>
+        </div>
+      </article>
+
+      <aside class="panel-card reveal">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Your Tickets</span>
+            <h3>Registrations</h3>
+          </div>
+        </div>
+        <div class="list" id="myRegistrations">
+          <div class="empty-state">
+            <h3>No registrations yet</h3>
+            <p>Book an event from the grid and your ticket details will appear here.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div id="toastHost" style="position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:80;"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

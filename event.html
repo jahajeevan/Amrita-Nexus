@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Event Details | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-events" data-page="event-detail">
+  <header class="topbar reveal in-view">
+    <div class="topbar-inner">
+      <a class="brand" href="events.html">
+        <div class="brand-mark">
+          <img src="assets-amrita-logo.png" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div class="brand-copy">
+          <strong>Amrita Nexus</strong>
+          <span>Event details</span>
+        </div>
+      </a>
+      <nav class="topnav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="events.html" class="active">Events</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="danger-btn hidden" data-auth="logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-shell detail-shell">
+    <div id="eventDetailRoot" class="panel-card reveal in-view">
+      <div class="empty-state">
+        <h3>Loading event details...</h3>
+        <p>Please wait while we fetch the latest event information.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastHost" style="position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:80;"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

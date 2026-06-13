@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Contact | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-events" data-page="contact">
+  <header class="topbar reveal in-view">
+    <div class="topbar-inner">
+      <a class="brand" href="events.html">
+        <div class="brand-mark">
+          <img src="assets-amrita-logo.png" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div class="brand-copy">
+          <strong>Amrita Nexus</strong>
+          <span>Student support desk</span>
+        </div>
+      </a>
+      <nav class="topnav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="events.html">Events</a>
+        <a href="contact.html" class="active">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="danger-btn hidden" data-auth="logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-shell contact-shell">
+    <section class="dashboard-grid contact-grid">
+      <article class="panel-card reveal in-view">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Contact Desk</span>
+            <h3>Reach the campus event team</h3>
+          </div>
+        </div>
+        <div class="contact-copy">
+          <p>Amrita Vishwa Vidyapeetham, Ettimadai, Coimbatore, Tamil Nadu 641112</p>
+          <p>Email: jahajeevanv@gmail.com | Phone: 7845265507</p>
+        </div>
+        <div class="card-actions">
+          <a class="outline-btn" href="https://www.google.com/maps/search/?api=1&query=Amrita%20Vishwa%20Vidyapeetham%20Ettimadai%20Coimbatore" target="_blank" rel="noreferrer">Open in Maps</a>
+        </div>
+      </article>
+
+      <article class="panel-card reveal in-view">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Send Message</span>
+            <h3>Tell us what you need</h3>
+          </div>
+        </div>
+        <form id="contactForm" class="admin-form">
+          <label class="label">
+            <span>Your name</span>
+            <input class="input" type="text" name="name" required>
+          </label>
+          <label class="label">
+            <span>Your email</span>
+            <input class="input" type="email" name="email" readonly>
+          </label>
+          <label class="label">
+            <span>Message</span>
+            <textarea class="textarea" name="message" required></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="btn" type="submit" id="contactSubmitBtn">Submit</button>
+          </div>
+          <p id="contactFeedback" class="feedback"></p>
+        </form>
+      </article>
+    </section>
+
+    <section class="panel-card reveal in-view">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Replies</span>
+          <h3>Admin responses</h3>
+        </div>
+      </div>
+      <div class="list" id="contactRepliesList">
+        <div class="empty-state">
+          <h3>No messages yet</h3>
+          <p>Your submitted questions and admin replies will appear here.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastHost" style="position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:80;"></div>
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

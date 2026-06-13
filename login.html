@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Portal | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-auth" data-page="login">
+  <main class="auth-clean-shell">
+    <section class="auth-clean-panel">
+      <div class="auth-clean-brand">
+        <div class="auth-clean-mark">
+          <img src="assets-amrita-logo.png?v=20260506d" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div>
+          <strong>Amrita Nexus</strong>
+          <span>Smart campus event hub</span>
+        </div>
+      </div>
+
+      <div class="auth-clean-copy">
+        <span class="auth-clean-kicker">Secure access</span>
+        <h1>Welcome back</h1>
+        <p class="auth-clean-subtext">Students can sign in with their email and password. New students verify their Gmail using OTP once, set a password, and use that password from the next login onward. Admin signs in separately.</p>
+      </div>
+
+      <section class="auth-clean-pane active" data-auth-pane="student-login">
+        <form id="studentLoginForm" class="auth-clean-form">
+          <label class="auth-clean-label">
+            <span>Email</span>
+            <input type="email" name="email" class="auth-clean-input" placeholder="Enter your student email" autocomplete="email" required>
+          </label>
+          <label class="auth-clean-label">
+            <span>Password</span>
+            <input type="password" name="password" class="auth-clean-input" placeholder="Enter your password" autocomplete="current-password" required>
+          </label>
+          <div class="auth-clean-actions">
+            <button type="submit" class="auth-clean-primary">Sign in</button>
+          </div>
+          <p id="studentLoginFeedback" class="auth-clean-feedback" aria-live="polite"></p>
+        </form>
+        <p class="auth-clean-hint" style="margin-top: 24px;">Don’t have an account? <button type="button" class="auth-clean-link" data-tab-target="student-signup">Sign Up</button></p>
+        <p class="auth-clean-hint" style="margin-top: 8px;">Are you a staff member? <button type="button" class="auth-clean-link" data-tab-target="admin-login">Admin Login</button></p>
+      </section>
+
+      <section class="auth-clean-pane" data-auth-pane="student-signup">
+        <form id="studentSignupForm" class="auth-clean-form">
+          <label class="auth-clean-label">
+            <span>Full name</span>
+            <input type="text" id="signupName" name="name" class="auth-clean-input" placeholder="Enter your full name" autocomplete="name" required>
+          </label>
+          <label class="auth-clean-label">
+            <span>Email</span>
+            <input type="email" id="signupEmail" name="email" class="auth-clean-input" placeholder="Enter your Gmail address" autocomplete="email" required>
+          </label>
+          <div class="auth-clean-actions">
+            <button type="button" class="auth-clean-primary" data-signup-send>Send OTP</button>
+          </div>
+
+          <div id="signupOtpStep" class="auth-clean-stack" style="margin-top: 14px;" hidden>
+            <label class="auth-clean-label">
+              <span>OTP</span>
+              <input type="text" id="signupOtp" name="otp" class="auth-clean-input" placeholder="Enter the OTP from Gmail" inputmode="numeric" autocomplete="one-time-code">
+            </label>
+            <div class="auth-clean-actions">
+              <button type="button" class="auth-clean-secondary" data-signup-verify>Verify OTP</button>
+            </div>
+          </div>
+
+          <div id="signupPasswordStep" class="auth-clean-stack" style="margin-top: 14px;" hidden>
+            <label class="auth-clean-label">
+              <span>Create password</span>
+              <input type="password" id="signupPassword" name="password" class="auth-clean-input" placeholder="Create a secure password" autocomplete="new-password">
+            </label>
+            <div class="auth-clean-actions">
+              <button type="button" class="auth-clean-primary" data-signup-register>Create Password &amp; Continue</button>
+            </div>
+          </div>
+
+          <p id="studentSignupFeedback" class="auth-clean-feedback" aria-live="polite"></p>
+        </form>
+        <p class="auth-clean-hint" style="margin-top: 24px;">Already have an account? <button type="button" class="auth-clean-link" data-tab-target="student-login">Student Login</button></p>
+      </section>
+
+      <section class="auth-clean-pane" data-auth-pane="admin-login">
+        <form id="adminLoginForm" class="auth-clean-form">
+          <label class="auth-clean-label">
+            <span>Admin email</span>
+            <input type="email" id="adminEmail" name="email" class="auth-clean-input" placeholder="Enter admin email" autocomplete="email" required>
+          </label>
+          <label class="auth-clean-label">
+            <span>Password</span>
+            <input type="password" id="adminPassword" name="password" class="auth-clean-input" placeholder="Enter admin password" autocomplete="current-password" required>
+          </label>
+          <div class="auth-clean-actions">
+            <button type="submit" class="auth-clean-primary">Proceed to admin</button>
+          </div>
+          <p id="adminLoginFeedback" class="auth-clean-feedback" aria-live="polite"></p>
+        </form>
+        <p class="auth-clean-hint" style="margin-top: 24px;">Student access? <button type="button" class="auth-clean-link" data-tab-target="student-login">Student Login</button></p>
+      </section>
+    </section>
+
+    <section class="auth-clean-visual">
+      <div class="auth-clean-visual-copy">
+        <div class="auth-clean-visual-badge" style="display: inline-block; background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Amrita Campus Events</div>
+        <h2>Organize every event with clarity.</h2>
+        <p>One login flow for students, one secure access path for admin, and a cleaner campus experience from registration to ticketing.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

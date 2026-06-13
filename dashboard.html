@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Home | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-events" data-page="dashboard">
+  <header class="topbar reveal in-view">
+    <div class="topbar-inner">
+      <a class="brand" href="events.html">
+        <div class="brand-mark">
+          <img src="assets-amrita-logo.png" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div class="brand-copy">
+          <strong>Amrita Nexus</strong>
+          <span>Student home</span>
+        </div>
+      </a>
+      <nav class="topnav">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="events.html">Events</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="danger-btn hidden" data-auth="logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <article class="dashboard-card reveal in-view">
+        <span class="eyebrow">Home</span>
+        <h1 id="dashboardGreeting">Welcome back</h1>
+        <p class="panel-subtext">This is your quick home. Check your registration health, jump to events, and manage your tickets in one place.</p>
+      </article>
+      <div class="metrics-grid reveal in-view">
+        <div class="metric-card">
+          <strong id="dashboardRegisteredCount">0</strong>
+          <span class="kpi-label">Registrations</span>
+        </div>
+        <div class="metric-card">
+          <strong id="dashboardBookmarkCount">0</strong>
+          <span class="kpi-label">Bookmarks</span>
+        </div>
+        <div class="metric-card">
+          <strong id="dashboardTicketCount">0</strong>
+          <span class="kpi-label">Tickets ready</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel-card reveal in-view">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Quick Actions</span>
+            <h3>Get started faster</h3>
+          </div>
+        </div>
+        <div class="card-actions">
+          <a class="btn" href="events.html">Explore Events</a>
+          <a class="ghost-btn" href="contact.html">Contact Desk</a>
+        </div>
+        <div class="list" id="dashboardRegistrationsList">
+          <div class="empty-state">
+            <h3>No registrations yet</h3>
+            <p>Your confirmed events will appear here.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel-card reveal in-view">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Ticket Vault</span>
+            <h3>Download and keep tickets</h3>
+          </div>
+        </div>
+        <div class="list" id="dashboardTicketsList">
+          <div class="empty-state">
+            <h3>No tickets yet</h3>
+            <p>After registration, your ticket cards will show up here.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel-card reveal in-view">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Why Dashboard?</span>
+          <h3>How this differs from Events</h3>
+        </div>
+      </div>
+      <div class="list">
+        <div class="list-item">
+          <h4>Home dashboard</h4>
+          <p>Personal center for your registrations, ticket downloads, and quick actions.</p>
+        </div>
+        <div class="list-item">
+          <h4>Events page</h4>
+          <p>Discovery space with search, category filters, and detailed event exploration.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastHost" style="position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:80;"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

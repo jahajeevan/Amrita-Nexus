@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Admin Dashboard | Amrita Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260613f">
+</head>
+<body class="page-admin" data-page="admin">
+  <header class="topbar reveal in-view">
+    <div class="topbar-inner">
+      <a class="brand" href="admin.html">
+        <div class="brand-mark">
+          <img src="assets-amrita-logo.png" alt="Amrita Vishwa Vidyapeetham logo">
+        </div>
+        <div class="brand-copy">
+          <strong>Amrita Nexus</strong>
+          <span>Admin workspace</span>
+        </div>
+      </a>
+      <nav class="topnav">
+        <a href="admin.html" class="active">Admin</a>
+      </nav>
+      <div class="header-actions">
+        <button class="danger-btn hidden" data-auth="logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-shell">
+    <aside class="sidebar reveal in-view">
+      <span class="eyebrow">Admin Account</span>
+      <div class="brand-copy" style="margin-top:14px;">
+        <strong id="adminEmailBadge">jahajeevanv@gmail.com</strong>
+        <span>Manage events, registrations, and content updates.</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#publisher" class="active">Create Event</a>
+        <a href="#registeredStudents">Registered Students</a>
+        <a href="#messagesPanel">Messages</a>
+      </nav>
+    </aside>
+
+    <section class="admin-main">
+      <section class="admin-overview-simple reveal in-view">
+        <div class="admin-overview-card admin-overview-compact">
+          <span class="eyebrow">Overview</span>
+          <p><strong id="adminEventCount">0</strong> events • <strong id="adminUserCount">0</strong> students • <strong id="adminRegistrationCount">0</strong> registrations</p>
+        </div>
+      </section>
+
+      <div class="admin-quick-links reveal in-view">
+        <a class="outline-btn" href="#publisher">Create Event</a>
+        <a class="outline-btn" href="#registeredStudents">Registered Students</a>
+        <a class="outline-btn" href="#messagesPanel">Messages</a>
+      </div>
+
+      <section class="admin-grid">
+        <article class="panel-card reveal" id="publisher">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Publisher</span>
+              <h3 id="eventFormTitle">Create event</h3>
+            </div>
+          </div>
+          <form id="eventForm" class="admin-form">
+            <label class="label">
+              <span>Event title</span>
+              <input class="input" type="text" name="title" required>
+            </label>
+            <label class="label">
+              <span>Date</span>
+              <input class="input" type="date" name="date" required>
+            </label>
+            <label class="label">
+              <span>Start time</span>
+              <input class="input" type="time" name="time">
+            </label>
+            <label class="label">
+              <span>End time</span>
+              <input class="input" type="time" name="endTime">
+            </label>
+            <label class="label">
+              <span>Venue</span>
+              <input class="input" type="text" name="venue" required>
+            </label>
+            <label class="label">
+              <span>Category</span>
+              <select class="select" name="category" required>
+                <option value="" selected disabled></option>
+                <option value="Tech">Tech</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Sports">Sports</option>
+                <option value="Expo">Expo</option>
+              </select>
+            </label>
+            <label class="label">
+              <span>Event image</span>
+              <input class="input" type="file" name="imageFile" accept="image/*">
+            </label>
+            <label class="label">
+              <span>Description</span>
+              <textarea class="textarea" name="description" required></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="btn" type="submit" id="saveEventBtn">Publish Event</button>
+              <button class="ghost-btn" type="button" id="resetEventBtn">Reset</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="admin-table-card reveal">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Inventory</span>
+              <h3>Existing events</h3>
+            </div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Date</th>
+                <th>Venue</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="eventsBody">
+              <tr>
+                <td colspan="4">Loading events...</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </section>
+
+      <article class="admin-table-card reveal" id="registeredStudents">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Registrations</span>
+            <h3>Registered students</h3>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Ticket ID</th>
+              <th>Student</th>
+              <th>Department</th>
+              <th>Venue</th>
+              <th>Event End</th>
+              <th>Registered At</th>
+            </tr>
+          </thead>
+          <tbody id="registrationsBody">
+            <tr>
+              <td colspan="7">Loading registrations...</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="admin-table-card reveal" id="messagesPanel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Messages</span>
+            <h3>Student contact requests</h3>
+          </div>
+        </div>
+        <div class="list admin-messages-list" id="adminMessagesList">
+          <div class="empty-state">
+            <h3>No messages yet</h3>
+            <p>Student contact requests will appear here.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="toastHost" style="position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:80;"></div>
+  <script src="js/main.js?v=20260613e"></script>
+</body>
+</html>

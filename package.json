@@ -1,0 +1,79 @@
+{
+  "name": "amrita-nexus-smart-campus-event-hub",
+  "version": "1.0.1",
+  "description": "Electron desktop app for Amrita Nexus",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "node server.js",
+    "dev:server": "nodemon server.js",
+    "desktop": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac dmg --arm64",
+    "dist:win": "electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "nodemailer": "^6.10.0"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^24.13.3",
+    "nodemon": "^3.1.7"
+  },
+  "build": {
+    "appId": "com.amrita.nexus",
+    "productName": "Amrita Nexus",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "login.html",
+      "events.html",
+      "event.html",
+      "dashboard.html",
+      "admin.html",
+      "contact.html",
+      "css/**/*",
+      "styles/**/*",
+      "js/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "artifactName": "Amrita-Nexus-Mac-AppleSilicon-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Amrita-Nexus-Windows-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
