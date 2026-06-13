@@ -11,6 +11,7 @@ const OTP_TTL_MS = 5 * 60 * 1000;
 const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 const normalizeName = (value) => String(value || "").trim();
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
+const shouldPreviewOtp = () => String(process.env.DEMO_OTP_PREVIEW || "").toLowerCase() === "true";
 
 const getAdminEmails = () => (process.env.ADMIN_EMAILS || "")
   .split(",")
@@ -52,19 +53,30 @@ const sendOtp = async (req, res, next) => {
       verified: false
     });
 
-    await mailer.sendMail({
-      from: process.env.MAIL_FROM,
-      to: email,
-      subject: "Amrita Nexus OTP Verification",
-      html: `
-        <div style="font-family:Inter,Arial,sans-serif;padding:24px;color:#111827;">
-          <h2 style="margin:0 0 12px;">Amrita Nexus</h2>
-          <p style="margin:0 0 18px;">Use this one-time password to verify your student email address:</p>
-          <div style="font-size:32px;font-weight:700;letter-spacing:6px;margin:0 0 18px;">${otp}</div>
-          <p style="margin:0;color:#4b5563;">This OTP is valid for 5 minutes.</p>
-        </div>
-      `
-    });
+    if (shouldPreviewOtp()) {
+      return res.json({
+        message: "Demo OTP generated successfully.",
+        previewOtp: otp
+      });
+    }
+
+    try {
+      await mailer.sendMail({
+        from: process.env.MAIL_FROM,
+        to: email,
+        subject: "Amrita Nexus OTP Verification",
+        html: `
+          <div style="font-family:Inter,Arial,sans-serif;padding:24px;color:#111827;">
+            <h2 style="margin:0 0 12px;">Amrita Nexus</h2>
+            <p style="margin:0 0 18px;">Use this one-time password to verify your student email address:</p>
+            <div style="font-size:32px;font-weight:700;letter-spacing:6px;margin:0 0 18px;">${otp}</div>
+            <p style="margin:0;color:#4b5563;">This OTP is valid for 5 minutes.</p>
+          </div>
+        `
+      });
+    } catch (mailError) {
+      throw mailError;
+    }
 
     return res.json({ message: "OTP sent successfully to your email." });
   } catch (error) {

@@ -875,12 +875,18 @@ const App = (() => {
       }
       setLoading(sendButton, true, "Sending OTP");
       try {
-        await api("/auth/send-otp", {
+        const response = await api("/auth/send-otp", {
           method: "POST",
           body: JSON.stringify({ email })
         });
         otpStep.classList.remove("hidden");
-        setFeedback(signupFeedback, "OTP sent successfully. Check your Gmail inbox.", "success");
+        setFeedback(
+          signupFeedback,
+          response.previewOtp
+            ? `Demo OTP: ${response.previewOtp}`
+            : "OTP sent successfully. Check your Gmail inbox.",
+          "success"
+        );
       } catch (error) {
         setFeedback(signupFeedback, error.message, "error");
       } finally {
