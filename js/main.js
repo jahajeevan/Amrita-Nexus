@@ -96,10 +96,10 @@ const App = (() => {
     const USE_REAL_BACKEND = !isLocal || localStorage.getItem("use_real_backend") === "true";
 
     if (USE_REAL_BACKEND) {
-      // Points to Render in production, points to local port 5001 during local development
+      // Points to current host in production, points to local port 5001 during local development
       const BASE_URL = isLocal 
         ? "http://localhost:5001/api" 
-        : "https://amrita-nexus.onrender.com/api"; // <-- REPLACE THIS WITH YOUR DEPLOYED RENDER BACKEND URL!
+        : window.location.origin + "/api";
       const session = getSession();
       const headers = {
         "Content-Type": "application/json",
