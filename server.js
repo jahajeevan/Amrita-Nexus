@@ -26,7 +26,6 @@ app.use(
 
 app.use(express.json());
 
-const path = require("path");
 // Serve static frontend files (HTML, CSS, JS, Assets) directly
 app.use(express.static(path.join(__dirname, "./")));
 
